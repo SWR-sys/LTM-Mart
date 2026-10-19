@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LTM mart - Sistem Keuangan & Akuntansi</title>
+    <title>LTM mart - Sistem Keuangan & Arsip Pengelola</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Vue.js 3 CDN -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <!-- Lucide Icons CDN -->
-    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            body { background: white; color: black; }
+            body { background: white; color: black; padding: 0; margin: 0; font-size: 12pt; }
+            .page-break { page-break-before: always; }
+            .printable-area { border: none !important; shadow: none !important; padding: 0 !important; width: 100% !important; }
         }
         .print-only { display: none; }
     </style>
@@ -27,20 +27,20 @@
     <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50 no-print">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
             <div class="flex items-center space-x-3">
-                <div class="bg-indigo-600 p-2 rounded-lg font-bold text-xl tracking-wider">LTM</div>
+                <div class="bg-indigo-600 px-3 py-1.5 rounded-lg font-black text-xl tracking-wider shadow">LTM</div>
                 <div>
                     <h1 class="text-lg font-bold leading-tight">LTM mart</h1>
-                    <p class="text-xs text-slate-400">Sistem Akuntansi & Keuangan Terpadu</p>
+                    <p class="text-xs text-slate-400">Sistem Akuntansi & Pusat Arsip Laporan</p>
                 </div>
             </div>
             
-            <div class="flex items-center space-x-4 text-xs md:text-sm">
+            <div class="flex items-center space-x-3 text-xs md:text-sm">
                 <div class="bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700 flex items-center space-x-2">
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span class="font-medium text-slate-200">{{ currentDateTime }}</span>
                 </div>
                 <div class="bg-indigo-950 text-indigo-300 px-3 py-1.5 rounded-full border border-indigo-800 font-semibold">
-                    Role: {{ currentRole }}
+                    Akses: Pengelola Utama
                 </div>
             </div>
         </div>
@@ -48,10 +48,10 @@
 
     <!-- NAVIGATION TABS -->
     <nav class="bg-white border-b border-slate-200 sticky top-[61px] z-40 no-print shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 flex overflow-x-auto space-x-1 py-2 scrollbar-none">
+        <div class="max-w-7xl mx-auto px-4 flex overflow-x-auto space-x-2 py-2.5">
             <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
-                :class="['px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors flex items-center space-x-2',
-                activeTab === tab.id ? 'bg-indigo-600 text-white shadow' : 'text-slate-600 hover:bg-slate-100']">
+                :class="['px-4 py-2 rounded-lg text-xs md:text-sm font-bold whitespace-nowrap transition-all flex items-center space-x-2',
+                activeTab === tab.id ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100']">
                 <span>{{ tab.name }}</span>
             </button>
         </div>
@@ -60,63 +60,65 @@
     <!-- MAIN CONTENT AREA -->
     <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
 
-        <!-- TAB 1: DASHBOARD & EXECUTIVE SUMMARY -->
+        <!-- TAB 1: DASHBOARD & EXECUTIVE SUMMARY 1 LEMBAR -->
         <section v-if="activeTab === 'dashboard'" class="space-y-6">
             
             <!-- RINGKASAN SALDO LIKUID / KAS & BANK -->
-            <div>
-                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Posisi Kas & Rekening Bank (Likuiditas)</h2>
+            <div class="no-print">
+                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Posisi Likuiditas & Uang Riil Toko</h2>
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
                     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                         <p class="text-xs text-slate-500 font-medium">Kas Laci Kasir</p>
-                        <p class="text-lg font-bold text-slate-800 mt-1">{{ formatRupiah(getSaldo('1111')) }}</p>
+                        <p class="text-base md:text-lg font-bold text-slate-800 mt-1">{{ formatRupiah(getSaldo('1111')) }}</p>
                     </div>
                     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                        <p class="text-xs text-slate-500 font-medium">Kas Brankas</p>
-                        <p class="text-lg font-bold text-slate-800 mt-1">{{ formatRupiah(getSaldo('1112')) }}</p>
+                        <p class="text-xs text-slate-500 font-medium">Kas Brankas Toko</p>
+                        <p class="text-base md:text-lg font-bold text-slate-800 mt-1">{{ formatRupiah(getSaldo('1112')) }}</p>
                     </div>
                     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                         <p class="text-xs text-slate-500 font-medium">BNI QRIS (SWR)</p>
-                        <p class="text-lg font-bold text-blue-600 mt-1">{{ formatRupiah(getSaldo('1120')) }}</p>
+                        <p class="text-base md:text-lg font-bold text-blue-600 mt-1">{{ formatRupiah(getSaldo('1120')) }}</p>
                     </div>
                     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                         <p class="text-xs text-slate-500 font-medium">BNI BNIdirect</p>
-                        <p class="text-lg font-bold text-indigo-600 mt-1">{{ formatRupiah(getSaldo('1130')) }}</p>
+                        <p class="text-base md:text-lg font-bold text-indigo-600 mt-1">{{ formatRupiah(getSaldo('1130')) }}</p>
                     </div>
                     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm col-span-2 md:col-span-1">
-                        <p class="text-xs text-slate-500 font-medium">Bank Jatim (SFD)</p>
-                        <p class="text-lg font-bold text-emerald-600 mt-1">{{ formatRupiah(getSaldo('1140')) }}</p>
+                        <p class="text-xs text-slate-500 font-medium">Bank Jatim QRIS (SFD)</p>
+                        <p class="text-base md:text-lg font-bold text-emerald-600 mt-1">{{ formatRupiah(getSaldo('1140')) }}</p>
                     </div>
                 </div>
             </div>
 
-            <!-- EXECUTIVE SUMMARY BOARD -->
-            <div id="printable-exec-summary" class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-6">
-                <div class="flex justify-between items-start border-b pb-4 border-slate-100">
+            <!-- EXECUTIVE SUMMARY BOARD (1 LEMBAR SIAP CETAK) -->
+            <div id="exec-summary-print" class="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm space-y-6 printable-area">
+                <div class="flex justify-between items-start border-b pb-4 border-slate-200">
                     <div>
-                        <div class="text-xs font-bold text-indigo-600 tracking-wider uppercase">Executive Summary</div>
-                        <h2 class="text-2xl font-black text-slate-800">LTM mart</h2>
-                        <p class="text-xs text-slate-400">Ringkasan Kinerja Keuangan & Kontrol Operasional</p>
+                        <div class="text-xs font-bold text-indigo-600 tracking-widest uppercase">Laporan Ringkasan Eksekutif (Arsip Official)</div>
+                        <h2 class="text-2xl md:text-3xl font-black text-slate-800 mt-1">LTM mart</h2>
+                        <p class="text-xs text-slate-400">Periode Berjalan • Laporan Pengelola</p>
                     </div>
-                    <button @click="printSummary" class="no-print px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-semibold hover:bg-slate-800">
-                        Cetak Laporan 1 Lembar
+                    <button @click="cetakHalaman" class="no-print px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800 shadow">
+                        Cetak Dokumen Ringkasan (A4)
                     </button>
                 </div>
 
-                <div class="grid md:grid-cols-3 gap-6">
-                    <!-- LABA RUGI HIGHLIGHT -->
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 space-y-2">
-                        <h3 class="text-xs font-bold uppercase text-slate-500">1. Kinerja Usaha</h3>
+                <!-- 4 POIN RINGKASAN SESUAI RANCANGAN MASTER -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    
+                    <!-- POIN 1: HIGHLIGHT LABA RUGI -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                        <h3 class="text-xs font-bold uppercase text-indigo-600 border-b pb-1">1. Highlight Kinerja Keuangan</h3>
                         <div class="flex justify-between text-xs">
-                            <span>Pendapatan Penjualan:</span>
+                            <span class="text-slate-600">Total Omzet Penjualan Produk:</span>
                             <span class="font-bold">{{ formatRupiah(totalPendapatanProduk) }}</span>
                         </div>
                         <div class="flex justify-between text-xs">
-                            <span>Pendapatan Jasa:</span>
+                            <span class="text-slate-600">Total Pendapatan Jasa (Fee & Tarik Tunai):</span>
                             <span class="font-bold">{{ formatRupiah(totalPendapatanJasa) }}</span>
                         </div>
                         <div class="flex justify-between text-xs text-rose-600">
-                            <span>HPP & Operasional:</span>
+                            <span>Total HPP & Beban Operasional:</span>
                             <span class="font-bold">-{{ formatRupiah(totalHPP + totalBeban) }}</span>
                         </div>
                         <div class="border-t pt-2 flex justify-between font-bold text-sm text-emerald-700">
@@ -125,72 +127,94 @@
                         </div>
                     </div>
 
-                    <!-- KONTROL PIUTANG & PINJAMAN -->
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 space-y-2">
-                        <h3 class="text-xs font-bold uppercase text-slate-500">2. Piutang & Pinjaman</h3>
+                    <!-- POIN 2: KONTROL PIUTANG & PINJAMAN -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                        <h3 class="text-xs font-bold uppercase text-indigo-600 border-b pb-1">2. Kontrol Pinjaman & Tagihan</h3>
                         <div class="flex justify-between text-xs">
-                            <span>Pinjaman Karyawan:</span>
+                            <span class="text-slate-600">Sisa Pinjaman Karyawan (Per Nama):</span>
                             <span class="font-bold text-amber-700">{{ formatRupiah(getSaldo('1220')) }}</span>
                         </div>
                         <div class="flex justify-between text-xs">
-                            <span>Pinjaman Pribadi (Kolektif):</span>
+                            <span class="text-slate-600">Sisa Pinjaman Pribadi (Kolektif):</span>
                             <span class="font-bold text-amber-700">{{ formatRupiah(getSaldo('1230')) }}</span>
                         </div>
                         <div class="flex justify-between text-xs">
-                            <span>Piutang Potong Gaji (KSP):</span>
+                            <span class="text-slate-600">Tagihan Potong Gaji (KSP):</span>
                             <span class="font-bold text-blue-700">{{ formatRupiah(getSaldo('1210')) }}</span>
                         </div>
-                        <div class="border-t pt-2 flex justify-between text-xs font-semibold text-slate-700">
-                            <span>Total Piutang Berjalan:</span>
+                        <div class="border-t pt-2 flex justify-between text-xs font-bold text-slate-800">
+                            <span>TOTAL PIUTANG AKTIF:</span>
                             <span>{{ formatRupiah(getSaldo('1220') + getSaldo('1230') + getSaldo('1210')) }}</span>
                         </div>
                     </div>
 
-                    <!-- HUTANG & KELUARAN KSP -->
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 space-y-2">
-                        <h3 class="text-xs font-bold uppercase text-slate-500">3. Kewajiban & Transit</h3>
+                    <!-- POIN 3: UTANG & TRANSIT KSP -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                        <h3 class="text-xs font-bold uppercase text-indigo-600 border-b pb-1">3. Kewajiban & Transit KSP</h3>
                         <div class="flex justify-between text-xs">
-                            <span>Utang KSP (Dana Transit):</span>
+                            <span class="text-slate-600">Utang KSP / Dana Transit (BNI Direct):</span>
                             <span class="font-bold text-rose-700">{{ formatRupiah(getSaldo('2110')) }}</span>
                         </div>
                         <div class="flex justify-between text-xs">
-                            <span>Utang Supplier:</span>
+                            <span class="text-slate-600">Utang Supplier / Konsinyasi:</span>
                             <span class="font-bold text-rose-700">{{ formatRupiah(getSaldo('2120')) }}</span>
                         </div>
-                        <div class="border-t pt-2 flex justify-between text-xs font-semibold text-slate-700">
-                            <span>Total Kewajiban:</span>
+                        <div class="border-t pt-2 flex justify-between text-xs font-bold text-slate-800">
+                            <span>TOTAL KEWAJIBAN:</span>
                             <span>{{ formatRupiah(getSaldo('2110') + getSaldo('2120')) }}</span>
                         </div>
                     </div>
+
+                    <!-- POIN 4: CATATAN WRITE-OFF & EVALUASI -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                        <h3 class="text-xs font-bold uppercase text-indigo-600 border-b pb-1">4. Catatan Kerugian & Evaluasi</h3>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-600">Beban Kerugian Piutang (Write-Off):</span>
+                            <span class="font-bold text-rose-600">{{ formatRupiah(getSaldo('6130')) }}</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 italic mt-1">
+                            * Dokumen ini dapat dicetak sebagai arsip resmi pertanggungjawaban pengelola.
+                        </p>
+                    </div>
+
                 </div>
 
-                <div class="text-xs text-slate-400 border-t pt-4 flex justify-between items-center">
-                    <span>LTM mart System • Auto-Generated Realtime Report</span>
-                    <span>Printed/Viewed at: {{ currentDateTime }}</span>
+                <!-- TANDA TANGAN PENGELOLA (1 ORANG) -->
+                <div class="pt-8 border-t border-slate-200 flex justify-end text-center text-xs">
+                    <div class="w-64">
+                        <p class="text-slate-500">Pengelola LTM mart,</p>
+                        <div class="h-16"></div>
+                        <p class="font-bold text-slate-800">( .................................... )</p>
+                    </div>
+                </div>
+
+                <div class="text-[10px] text-slate-400 border-t pt-3 flex justify-between items-center">
+                    <span>LTM mart System • Official Printed Archive</span>
+                    <span>Waktu Cetak: {{ currentDateTime }}</span>
                 </div>
             </div>
         </section>
 
-        <!-- TAB 2: INPUT TRANSAKSI HARIAN -->
+        <!-- TAB 2: INPUT TRANSAKSI PENGELOLA -->
         <section v-if="activeTab === 'input'" class="grid md:grid-cols-2 gap-6">
             
-            <!-- FORM TRANSAKSI -->
+            <!-- FORM INPUT TRANSAKSI -->
             <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
-                <h2 class="text-lg font-bold text-slate-800 border-b pb-2">Form Entry Transaksi</h2>
+                <h2 class="text-base font-bold text-slate-800 border-b pb-2">Form Entry Transaksi Pengelola</h2>
                 
                 <form @submit.prevent="submitTransaksi" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Jenis Transaksi</label>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Pilih Jenis Transaksi</label>
                         <select v-model="form.jenis" @change="resetFormDetail" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-indigo-500">
-                            <option value="penjualan">1. Penjualan Produk (Sarung / Minuman / ATK)</option>
+                            <option value="penjualan">1. Rekap Penjualan Produk (Sarung / Minuman / ATK)</option>
                             <option value="jasa_payroll">2. Jasa Fee Payroll</option>
-                            <option value="pinjaman_karyawan">3. Pinjaman Karyawan (Per Nama & Tenor)</option>
-                            <option value="pinjaman_pribadi">4. Pinjaman Pribadi (Kolektif)</option>
+                            <option value="pinjaman_karyawan">3. Pinjaman Karyawan (Lengkap Tenor & Nama)</option>
+                            <option value="pinjaman_pribadi">4. Pinjaman Pribadi (Kolektif / Tanpa Nama)</option>
                             <option value="tarik_tunai">5. Jasa Tarik Tunai</option>
-                            <option value="transfer_kas">6. Transfer Kas Internal (Laci <-> Brankas)</option>
+                            <option value="transfer_kas">6. Transfer Kas Internal (Laci Kasir <-> Brankas)</option>
                             <option value="transit_ksp">7. Transaksi Transit KSP (via BNI Direct)</option>
-                            <option value="write_off">8. Penghapusan Piutang (Write-Off)</option>
-                            <option value="operasional">9. Biaya Operasional / Beban</option>
+                            <option value="write_off">8. Penghapusan Piutang (Write-Off Macet)</option>
+                            <option value="operasional">9. Biaya Operasional / Beban Toko</option>
                         </select>
                     </div>
 
@@ -206,12 +230,13 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Metode Bayar</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Penerimaan Pembayaran</label>
                                 <select v-model="form.rekening" class="w-full p-2 bg-slate-50 border rounded-lg text-sm">
                                     <option value="1111">Kas Laci Kasir</option>
+                                    <option value="1112">Kas Brankas</option>
                                     <option value="1120">BNI QRIS (SWR)</option>
                                     <option value="1140">Bank Jatim QRIS (SFD)</option>
-                                    <option value="1210">Potong Gaji (KSP)</option>
+                                    <option value="1210">Potong Gaji (Tagihan KSP)</option>
                                 </select>
                             </div>
                         </div>
@@ -239,12 +264,12 @@
                                 <input type="number" v-model.number="form.nominal" class="w-full p-2 border rounded-lg text-sm" required>
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Tenor (Bulan)</label>
-                                <input type="number" v-model.number="form.tenor" class="w-full p-2 border rounded-lg text-sm" placeholder="Misal: 5" required>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Jangka Waktu (Tenor Bulan)</label>
+                                <input type="number" v-model.number="form.tenor" class="w-full p-2 border rounded-lg text-sm" placeholder="Contoh: 5" required>
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Sumber Uang</label>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Sumber Uang Ditransfer/Dicairkan Dari</label>
                             <select v-model="form.rekening" class="w-full p-2 bg-slate-50 border rounded-lg text-sm">
                                 <option value="1111">Kas Laci Kasir</option>
                                 <option value="1112">Kas Brankas</option>
@@ -256,14 +281,14 @@
                     <!-- TRANSFER KAS INTERNAL -->
                     <template v-if="form.jenis === 'transfer_kas'">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Arah Transfer</label>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Arah Mutasi Uang Tunai</label>
                             <select v-model="form.arahKas" class="w-full p-2 bg-slate-50 border rounded-lg text-sm">
-                                <option value="laci_ke_brankas">Setor Laci Kasir -> Brankas (Drop)</option>
-                                <option value="brankas_ke_laci">Ambil Brankas -> Laci Kasir (Modal Kembalian)</option>
+                                <option value="laci_ke_brankas">Setor/Drop dari Laci Kasir -> Brankas</option>
+                                <option value="brankas_ke_laci">Ambil dari Brankas -> Modal Laci Kasir</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nominal (Rp)</label>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nominal Mutasi (Rp)</label>
                             <input type="number" v-model.number="form.nominal" class="w-full p-2 border rounded-lg text-sm" required>
                         </div>
                     </template>
@@ -272,16 +297,16 @@
                     <template v-if="form.jenis === 'tarik_tunai'">
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Uang Tunai Keluar (Rp)</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Uang Tunai Diserahkan (Rp)</label>
                                 <input type="number" v-model.number="form.nominal" class="w-full p-2 border rounded-lg text-sm" required>
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">Uang Jasa / Fee (Rp)</label>
-                                <input type="number" v-model.number="form.fee" class="w-full p-2 border rounded-lg text-sm" placeholder="0 jika tanpa fee">
+                                <input type="number" v-model.number="form.fee" class="w-full p-2 border rounded-lg text-sm" placeholder="Isi 0 jika gratis">
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Rekening Masuk (QRIS/Transfer)</label>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Rekening Transfer Masuk</label>
                             <select v-model="form.rekening" class="w-full p-2 bg-slate-50 border rounded-lg text-sm">
                                 <option value="1120">BNI QRIS (SWR)</option>
                                 <option value="1140">Bank Jatim QRIS (SFD)</option>
@@ -290,10 +315,10 @@
                         </div>
                     </template>
 
-                    <!-- GENERIC NOMINAL & REKENING UNTUK JENIS LAIN -->
+                    <!-- NOMINAL UNTUK TRANSAKSI UMUM LAINNYA -->
                     <template v-if="['jasa_payroll', 'pinjaman_pribadi', 'transit_ksp', 'write_off', 'operasional'].includes(form.jenis)">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nominal (Rp)</label>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nominal Transaksi (Rp)</label>
                             <input type="number" v-model.number="form.nominal" class="w-full p-2 border rounded-lg text-sm" required>
                         </div>
                         <div>
@@ -309,65 +334,72 @@
                     </template>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Keterangan Transaksi</label>
-                        <input type="text" v-model="form.keterangan" placeholder="Catatan opsional..." class="w-full p-2 border rounded-lg text-sm">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Keterangan Tambahan</label>
+                        <input type="text" v-model="form.keterangan" placeholder="Catatan transaksi..." class="w-full p-2 border rounded-lg text-sm">
                     </div>
 
-                    <button type="submit" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-lg text-sm hover:bg-indigo-700 shadow-md transition-colors">
-                        Simpan & Catat Jurnal
+                    <button type="submit" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-lg text-sm hover:bg-indigo-700 shadow transition-colors">
+                        Simpan & Catat Jurnal Otomatis
                     </button>
                 </form>
             </div>
 
-            <!-- RIWAYAT INPUT TERAKHIR -->
+            <!-- JURNAL RIWAYAT INPUT -->
             <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
                 <div>
-                    <h2 class="text-lg font-bold text-slate-800 border-b pb-2 mb-4">5 Transaksi Terakhir</h2>
+                    <h2 class="text-base font-bold text-slate-800 border-b pb-2 mb-4">5 Jurnal Transaksi Terakhir</h2>
                     <div class="space-y-3">
                         <div v-for="j in recentJurnals" :key="j.id" class="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs flex justify-between items-center">
                             <div>
                                 <p class="font-bold text-slate-800">{{ j.keterangan }}</p>
-                                <p class="text-slate-400 mt-0.5">{{ j.tanggal }}</p>
+                                <p class="text-slate-400 mt-0.5">{{ j.tanggal }} • Akun: {{ j.akun }}</p>
                             </div>
-                            <span class="font-mono font-bold text-indigo-600">{{ formatRupiah(j.nominal) }}</span>
+                            <span class="font-mono font-bold text-indigo-600">{{ formatRupiah(j.debit || j.kredit) }}</span>
                         </div>
                     </div>
                 </div>
-                <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 mt-6">
-                    <p class="text-xs text-indigo-800 font-semibold">Petunjuk Keuangan LTM mart:</p>
-                    <p class="text-xs text-indigo-600 mt-1">Sistem otomatis menerbitkan baris Debit dan Kredit ke Jurnal Umum setiap kali Anda menekan tombol simpan.</p>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mt-6 text-xs text-slate-600">
+                    <p class="font-bold text-slate-800">Catatan Pembukuan:</p>
+                    <p class="mt-1">Data jurnal otomatis diperbarui dan langsung siap dicetak ke dalam dokumen arsip resmi.</p>
                 </div>
             </div>
         </section>
 
-        <!-- TAB 3: KARTU PINJAMAN KARYAWAN -->
+        <!-- TAB 3: KARTU PIUTANG KARYAWAN & CETAK DOKUMEN -->
         <section v-if="activeTab === 'karyawan'" class="space-y-6">
             <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                <h2 class="text-lg font-bold text-slate-800 border-b pb-4 mb-4">Kartu Piutang & Pinjaman Karyawan</h2>
+                <div class="flex justify-between items-center border-b pb-4 mb-4">
+                    <h2 class="text-base font-bold text-slate-800">Kartu Piutang Karyawan (Arsip & Cetak)</h2>
+                    <button @click="cetakHalaman" class="no-print px-3 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-lg">Cetak Kartu Piutang</button>
+                </div>
                 
+                <div v-if="Object.keys(pinjamanKaryawanGrouped).length === 0" class="text-xs text-slate-400 italic">
+                    Belum ada data pinjaman karyawan.
+                </div>
+
                 <div class="grid md:grid-cols-2 gap-4">
                     <div v-for="(k, name) in pinjamanKaryawanGrouped" :key="name" class="border rounded-xl p-4 bg-slate-50 space-y-3">
-                        <div class="flex justify-between items-start border-b pb-2">
+                        <div class="flex justify-between items-start border-b pb-2 border-slate-200">
                             <div>
-                                <h3 class="font-bold text-slate-800">{{ name }}</h3>
-                                <p class="text-xs text-slate-400">Tenor: {{ k.tenor }} Bulan • Tgl Pinjam: {{ k.tglPinjam }}</p>
+                                <h3 class="font-bold text-slate-800 text-sm">{{ name }}</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Tenor: {{ k.tenor }} Bulan • Tgl Pinjam: {{ k.tglPinjam }}</p>
                             </div>
-                            <span class="px-2 py-1 bg-amber-100 text-amber-800 font-bold rounded text-xs">
+                            <span class="px-2.5 py-1 bg-amber-100 text-amber-800 font-bold rounded-full text-xs">
                                 Sisa: {{ formatRupiah(k.sisa) }}
                             </span>
                         </div>
 
                         <div class="text-xs space-y-1">
-                            <div class="flex justify-between text-slate-500">
+                            <div class="flex justify-between text-slate-600">
                                 <span>Total Pinjaman Awal:</span>
                                 <span class="font-semibold">{{ formatRupiah(k.totalAwal) }}</span>
                             </div>
-                            <div class="flex justify-between text-slate-500">
-                                <span>Total Sudah Dibayar:</span>
+                            <div class="flex justify-between text-slate-600">
+                                <span>Total Sudah Dilunasi:</span>
                                 <span class="font-semibold text-emerald-600">{{ formatRupiah(k.sudahBayar) }}</span>
                             </div>
-                            <div class="flex justify-between text-slate-500">
-                                <span>Jatuh Tempo:</span>
+                            <div class="flex justify-between text-slate-600">
+                                <span>Estimasi Jatuh Tempo:</span>
                                 <span class="font-semibold text-rose-600">{{ k.jatuhTempo }}</span>
                             </div>
                         </div>
@@ -376,49 +408,94 @@
             </div>
         </section>
 
-        <!-- TAB 4: LAPORAN KEUANGAN RESMI -->
+        <!-- TAB 4: PUSAT ARSIP DOKUMEN CETAK RESMI -->
         <section v-if="activeTab === 'laporan'" class="space-y-6">
-            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-6">
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-6 printable-area">
                 <div class="flex justify-between items-center border-b pb-4">
-                    <h2 class="text-xl font-bold text-slate-800">Laporan Keuangan Resmi LTM mart</h2>
-                    <button @click="window.print()" class="no-print px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-semibold">Cetak Dokumen</button>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">PUSAT ARSIP DOKUMEN CETAK RESMI</h2>
+                        <p class="text-xs text-slate-400">Pilih dokumen yang ingin dicetak sebagai arsip fisik pertanggungjawaban</p>
+                    </div>
+                    <button @click="cetakHalaman" class="no-print px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold shadow">
+                        Cetak Laporan Lengkap (A4)
+                    </button>
                 </div>
 
-                <!-- NERACA SALDO -->
-                <div class="space-y-3">
-                    <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">1. Neraca Saldo (Trial Balance)</h3>
+                <!-- 1. DOKUMEN LABA RUGI -->
+                <div class="border rounded-xl p-5 bg-slate-50 space-y-3">
+                    <h3 class="text-sm font-bold text-slate-800 border-b pb-2">A. LAPORAN LABA RUGI RESMI (INCOME STATEMENT)</h3>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="flex justify-between font-bold text-slate-700">
+                            <span>PENDAPATAN PENJUALAN PRODUK:</span>
+                            <span>{{ formatRupiah(totalPendapatanProduk) }}</span>
+                        </div>
+                        <div class="flex justify-between font-bold text-slate-700">
+                            <span>PENDAPATAN JASA (FEE PAYROLL & TARIK TUNAI):</span>
+                            <span>{{ formatRupiah(totalPendapatanJasa) }}</span>
+                        </div>
+                        <div class="flex justify-between text-rose-600 border-t pt-1">
+                            <span>HARGA POKOK PENJUALAN (HPP):</span>
+                            <span>-{{ formatRupiah(totalHPP) }}</span>
+                        </div>
+                        <div class="flex justify-between text-rose-600">
+                            <span>TOTAL BEBAN OPERASIONAL & WRITE-OFF:</span>
+                            <span>-{{ formatRupiah(totalBeban) }}</span>
+                        </div>
+                        <div class="flex justify-between font-bold text-sm text-emerald-700 border-t pt-2">
+                            <span>LABA BERSIH OPERASIONAL:</span>
+                            <span>{{ formatRupiah(labaBersih) }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. NERACA SALDO RESMI -->
+                <div class="border rounded-xl p-5 bg-slate-50 space-y-3">
+                    <h3 class="text-sm font-bold text-slate-800 border-b pb-2">B. NERACA SALDO AKUN (TRIAL BALANCE)</h3>
                     <table class="w-full text-left border-collapse text-xs">
                         <thead>
-                            <tr class="bg-slate-100 border-b">
-                                <th class="p-2">Kode</th>
-                                <th class="p-2">Nama Akun</th>
-                                <th class="p-2 text-right">Debit</th>
-                                <th class="p-2 text-right">Kredit</th>
+                            <tr class="bg-slate-200 border-b">
+                                <th class="p-2 font-bold">Kode</th>
+                                <th class="p-2 font-bold">Nama Akun Buku Besar</th>
+                                <th class="p-2 font-bold text-right">Debit (Rp)</th>
+                                <th class="p-2 font-bold text-right">Kredit (Rp)</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="a in masterAkun" :key="a.kode" class="border-b">
-                                <td class="p-2 font-mono">{{ a.kode }}</td>
-                                <td class="p-2 font-medium">{{ a.nama }}</td>
+                            <tr v-for="a in masterAkun" :key="a.kode" class="border-b bg-white">
+                                <td class="p-2 font-mono text-slate-500">{{ a.kode }}</td>
+                                <td class="p-2 font-medium text-slate-800">{{ a.nama }}</td>
                                 <td class="p-2 text-right font-mono">{{ formatRupiah(getDebitKredit(a.kode).debit) }}</td>
                                 <td class="p-2 text-right font-mono">{{ formatRupiah(getDebitKredit(a.kode).kredit) }}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
+
+                <!-- KOLOM TANDA TANGAN DOKUMEN RESMI (1 ORANG) -->
+                <div class="pt-8 border-t border-slate-300 flex justify-end text-center text-xs">
+                    <div class="w-64">
+                        <p class="text-slate-500">Pengelola LTM mart,</p>
+                        <div class="h-16"></div>
+                        <p class="font-bold text-slate-800">( .................................... )</p>
+                    </div>
+                </div>
+
+                <div class="text-[10px] text-slate-400 border-t pt-3 flex justify-between items-center">
+                    <span>LTM mart Official Financial Archive</span>
+                    <span>Halaman Arsip Dicetak Pada: {{ currentDateTime }}</span>
+                </div>
+
             </div>
         </section>
 
     </main>
 
-    <!-- FOOTER CETAK UNTUK DOKUMEN -->
-    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400 no-print">
-        LTM mart Web Application • Dicetak secara otomatis pada {{ currentDateTime }}
+    <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-400 no-print">
+        LTM mart Web Application • System Timestamp: {{ currentDateTime }}
     </footer>
 
 </div>
 
-<!-- APPLICATION LOGIC (VUE.JS 3) -->
 <script>
 const { createApp } = Vue;
 
@@ -426,33 +503,32 @@ createApp({
     data() {
         return {
             activeTab: 'dashboard',
-            currentRole: 'Pengelola/Pemilik',
             currentDateTime: '',
             tabs: [
-                { id: 'dashboard', name: 'Dashboard Exec' },
+                { id: 'dashboard', name: 'Dashboard Exec (1 Lembar)' },
                 { id: 'input', name: 'Entry Transaksi' },
-                { id: 'karyawan', name: 'Pinjaman Karyawan' },
-                { id: 'laporan', name: 'Laporan Keuangan' }
+                { id: 'karyawan', name: 'Kartu Piutang Karyawan' },
+                { id: 'laporan', name: 'Pusat Arsip Cetak Laporan' }
             ],
             masterAkun: [
                 { kode: '1111', nama: 'Kas Tunai Laci Kasir' },
-                { kode: '1112', nama: 'Kas Tunai Brankas' },
+                { kode: '1112', nama: 'Kas Tunai Brankas Toko' },
                 { kode: '1120', nama: 'Bank BNI QRIS (SWR)' },
                 { kode: '1130', nama: 'Bank BNI BNIdirect' },
                 { kode: '1140', nama: 'Bank Jatim QRIS (SFD)' },
                 { kode: '1210', nama: 'Piutang Potong Gaji (KSP)' },
                 { kode: '1220', nama: 'Pinjaman Karyawan' },
                 { kode: '1230', nama: 'Pinjaman Pribadi (Kolektif)' },
-                { kode: '1310', nama: 'Persediaan Sarung' },
-                { kode: '1320', nama: 'Persediaan Minuman' },
+                { kode: '1310', nama: 'Persediaan Barang Sarung' },
+                { kode: '1320', nama: 'Persediaan Barang Minuman' },
                 { kode: '1330', nama: 'Persediaan ATK & Obat' },
-                { kode: '2110', nama: 'Utang KSP / Koperasi' },
+                { kode: '2110', nama: 'Utang KSP / Koperasi (Transit)' },
                 { kode: '2120', nama: 'Utang Supplier' },
                 { kode: '3110', nama: 'Modal Pemilik' },
-                { kode: '4110', nama: 'Pendapatan Sarung' },
-                { kode: '4120', nama: 'Pendapatan Minuman' },
-                { kode: '4130', nama: 'Pendapatan ATK & Obat' },
-                { kode: '4210', nama: 'Pendapatan Fee Payroll' },
+                { kode: '4110', nama: 'Pendapatan Penjualan Sarung' },
+                { kode: '4120', nama: 'Pendapatan Penjualan Minuman' },
+                { kode: '4130', nama: 'Pendapatan Penjualan ATK & Obat' },
+                { kode: '4210', nama: 'Pendapatan Jasa Fee Payroll' },
                 { kode: '4220', nama: 'Pendapatan Jasa Tarik Tunai' },
                 { kode: '5110', nama: 'HPP Sarung' },
                 { kode: '5120', nama: 'HPP Minuman' },
@@ -479,16 +555,17 @@ createApp({
         this.updateClock();
         setInterval(this.updateClock, 1000);
         
-        // Load data dari LocalStorage
-        const saved = localStorage.getItem('ltm_jurnal');
+        const saved = localStorage.getItem('ltm_jurnal_db');
         if (saved) {
             this.jurnal = JSON.parse(saved);
         } else {
-            // Seed awal jika kosong
+            // Saldo Awal Pengelola
             this.jurnal = [
-                { id: 1, tanggal: '2026-10-19', akun: '1111', debit: 1500000, kredit: 0, keterangan: 'Saldo Awal Laci' },
-                { id: 2, tanggal: '2026-10-19', akun: '1112', debit: 8000000, kredit: 0, keterangan: 'Saldo Awal Brankas' },
-                { id: 3, tanggal: '2026-10-19', akun: '3110', debit: 0, kredit: 9500000, keterangan: 'Modal Awal' }
+                { id: 1, tanggal: '2026-10-19', akun: '1111', debit: 1500000, kredit: 0, keterangan: 'Saldo Awal Laci Kasir' },
+                { id: 2, tanggal: '2026-10-19', akun: '1112', debit: 8000000, kredit: 0, keterangan: 'Saldo Awal Brankas Toko' },
+                { id: 3, tanggal: '2026-10-19', akun: '1120', debit: 6200000, kredit: 0, keterangan: 'Saldo Awal BNI QRIS SWR' },
+                { id: 4, tanggal: '2026-10-19', akun: '1130', debit: 10000000, kredit: 0, keterangan: 'Saldo Awal BNI BNIdirect' },
+                { id: 5, tanggal: '2026-10-19', akun: '3110', debit: 0, kredit: 25700000, keterangan: 'Modal Awal LTM mart' }
             ];
             this.saveJurnal();
         }
@@ -542,12 +619,10 @@ createApp({
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val || 0);
         },
         saveJurnal() {
-            localStorage.setItem('ltm_jurnal', JSON.stringify(this.jurnal));
+            localStorage.setItem('ltm_jurnal_db', JSON.stringify(this.jurnal));
         },
         getSaldo(kode) {
-            const d = this.getDebitOnly(kode);
-            const k = this.getKreditOnly(kode);
-            return d - k;
+            return this.getDebitOnly(kode) - this.getKreditOnly(kode);
         },
         getDebitOnly(kode) {
             return this.jurnal.filter(j => j.akun === kode).reduce((sum, j) => sum + j.debit, 0);
@@ -556,10 +631,7 @@ createApp({
             return this.jurnal.filter(j => j.akun === kode).reduce((sum, j) => sum + j.kredit, 0);
         },
         getDebitKredit(kode) {
-            return {
-                debit: this.getDebitOnly(kode),
-                kredit: this.getKreditOnly(kode)
-            };
+            return { debit: this.getDebitOnly(kode), kredit: this.getKreditOnly(kode) };
         },
         resetFormDetail() {
             this.form.nominal = 0;
@@ -573,12 +645,8 @@ createApp({
             if (this.form.jenis === 'penjualan') {
                 const mapAkun = { sarung: '4110', minuman: '4120', atk: '4130' };
                 const mapHpp = { sarung: '5110', minuman: '5120', atk: '5130' };
-                
-                // Kas (D) - Penjualan (K)
                 this.jurnal.push({ id, tanggal: tgl, akun: this.form.rekening, debit: this.form.nominal, kredit: 0, keterangan: `Penjualan ${this.form.kategoriProduk}` });
                 this.jurnal.push({ id, tanggal: tgl, akun: mapAkun[this.form.kategoriProduk], debit: 0, kredit: this.form.nominal, keterangan: `Penjualan ${this.form.kategoriProduk}` });
-                
-                // HPP (D) - Persediaan (K)
                 if (this.form.hpp > 0) {
                     this.jurnal.push({ id, tanggal: tgl, akun: mapHpp[this.form.kategoriProduk], debit: this.form.hpp, kredit: 0, keterangan: `HPP ${this.form.kategoriProduk}` });
                 }
@@ -588,15 +656,15 @@ createApp({
             } else if (this.form.jenis === 'transfer_kas') {
                 const dari = this.form.arahKas === 'laci_ke_brankas' ? '1111' : '1112';
                 const ke = this.form.arahKas === 'laci_ke_brankas' ? '1112' : '1111';
-                this.jurnal.push({ id, tanggal: tgl, akun: ke, debit: this.form.nominal, kredit: 0, keterangan: `Transfer Kas Internal` });
-                this.jurnal.push({ id, tanggal: tgl, akun: dari, debit: 0, kredit: this.form.nominal, keterangan: `Transfer Kas Internal` });
+                this.jurnal.push({ id, tanggal: tgl, akun: ke, debit: this.form.nominal, kredit: 0, keterangan: `Transfer Kas Internal Laci <-> Brankas` });
+                this.jurnal.push({ id, tanggal: tgl, akun: dari, debit: 0, kredit: this.form.nominal, keterangan: `Transfer Kas Internal Laci <-> Brankas` });
             }
 
             this.saveJurnal();
-            alert('Transaksi Berhasil Dicatat ke Jurnal Umum!');
+            alert('Transaksi Pengelola Berhasil Dicatat!');
             this.resetFormDetail();
         },
-        printSummary() {
+        cetakHalaman() {
             window.print();
         }
     }

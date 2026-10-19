@@ -1,1 +1,606 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LTM mart - Sistem Keuangan & Akuntansi</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue.js 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; color: black; }
+        }
+        .print-only { display: none; }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen">
 
+<div id="app" class="flex flex-col min-h-screen">
+
+    <!-- HEADER PRO DENGAN JAM REAL-TIME -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 p-2 rounded-lg font-bold text-xl tracking-wider">LTM</div>
+                <div>
+                    <h1 class="text-lg font-bold leading-tight">LTM mart</h1>
+                    <p class="text-xs text-slate-400">Sistem Akuntansi & Keuangan Terpadu</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-4 text-xs md:text-sm">
+                <div class="bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700 flex items-center space-x-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="font-medium text-slate-200">{{ currentDateTime }}</span>
+                </div>
+                <div class="bg-indigo-950 text-indigo-300 px-3 py-1.5 rounded-full border border-indigo-800 font-semibold">
+                    Role: {{ currentRole }}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVIGATION TABS -->
+    <nav class="bg-white border-b border-slate-200 sticky top-[61px] z-40 no-print shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 flex overflow-x-auto space-x-1 py-2 scrollbar-none">
+            <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
+                :class="['px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors flex items-center space-x-2',
+                activeTab === tab.id ? 'bg-indigo-600 text-white shadow' : 'text-slate-600 hover:bg-slate-100']">
+                <span>{{ tab.name }}</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
+
+        <!-- TAB 1: DASHBOARD & EXECUTIVE SUMMARY -->
+        <section v-if="activeTab === 'dashboard'" class="space-y-6">
+            
+            <!-- RINGKASAN SALDO LIKUID / KAS & BANK -->
+            <div>
+                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Posisi Kas & Rekening Bank (Likuiditas)</h2>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-xs text-slate-500 font-medium">Kas Laci Kasir</p>
+                        <p class="text-lg font-bold text-slate-800 mt-1">{{ formatRupiah(getSaldo('1111')) }}</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-xs text-slate-500 font-medium">Kas Brankas</p>
+                        <p class="text-lg font-bold text-slate-800 mt-1">{{ formatRupiah(getSaldo('1112')) }}</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-xs text-slate-500 font-medium">BNI QRIS (SWR)</p>
+                        <p class="text-lg font-bold text-blue-600 mt-1">{{ formatRupiah(getSaldo('1120')) }}</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-xs text-slate-500 font-medium">BNI BNIdirect</p>
+                        <p class="text-lg font-bold text-indigo-600 mt-1">{{ formatRupiah(getSaldo('1130')) }}</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm col-span-2 md:col-span-1">
+                        <p class="text-xs text-slate-500 font-medium">Bank Jatim (SFD)</p>
+                        <p class="text-lg font-bold text-emerald-600 mt-1">{{ formatRupiah(getSaldo('1140')) }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXECUTIVE SUMMARY BOARD -->
+            <div id="printable-exec-summary" class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-6">
+                <div class="flex justify-between items-start border-b pb-4 border-slate-100">
+                    <div>
+                        <div class="text-xs font-bold text-indigo-600 tracking-wider uppercase">Executive Summary</div>
+                        <h2 class="text-2xl font-black text-slate-800">LTM mart</h2>
+                        <p class="text-xs text-slate-400">Ringkasan Kinerja Keuangan & Kontrol Operasional</p>
+                    </div>
+                    <button @click="printSummary" class="no-print px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-semibold hover:bg-slate-800">
+                        Cetak Laporan 1 Lembar
+                    </button>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- LABA RUGI HIGHLIGHT -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 space-y-2">
+                        <h3 class="text-xs font-bold uppercase text-slate-500">1. Kinerja Usaha</h3>
+                        <div class="flex justify-between text-xs">
+                            <span>Pendapatan Penjualan:</span>
+                            <span class="font-bold">{{ formatRupiah(totalPendapatanProduk) }}</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span>Pendapatan Jasa:</span>
+                            <span class="font-bold">{{ formatRupiah(totalPendapatanJasa) }}</span>
+                        </div>
+                        <div class="flex justify-between text-xs text-rose-600">
+                            <span>HPP & Operasional:</span>
+                            <span class="font-bold">-{{ formatRupiah(totalHPP + totalBeban) }}</span>
+                        </div>
+                        <div class="border-t pt-2 flex justify-between font-bold text-sm text-emerald-700">
+                            <span>LABA BERSIH:</span>
+                            <span>{{ formatRupiah(labaBersih) }}</span>
+                        </div>
+                    </div>
+
+                    <!-- KONTROL PIUTANG & PINJAMAN -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 space-y-2">
+                        <h3 class="text-xs font-bold uppercase text-slate-500">2. Piutang & Pinjaman</h3>
+                        <div class="flex justify-between text-xs">
+                            <span>Pinjaman Karyawan:</span>
+                            <span class="font-bold text-amber-700">{{ formatRupiah(getSaldo('1220')) }}</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span>Pinjaman Pribadi (Kolektif):</span>
+                            <span class="font-bold text-amber-700">{{ formatRupiah(getSaldo('1230')) }}</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span>Piutang Potong Gaji (KSP):</span>
+                            <span class="font-bold text-blue-700">{{ formatRupiah(getSaldo('1210')) }}</span>
+                        </div>
+                        <div class="border-t pt-2 flex justify-between text-xs font-semibold text-slate-700">
+                            <span>Total Piutang Berjalan:</span>
+                            <span>{{ formatRupiah(getSaldo('1220') + getSaldo('1230') + getSaldo('1210')) }}</span>
+                        </div>
+                    </div>
+
+                    <!-- HUTANG & KELUARAN KSP -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 space-y-2">
+                        <h3 class="text-xs font-bold uppercase text-slate-500">3. Kewajiban & Transit</h3>
+                        <div class="flex justify-between text-xs">
+                            <span>Utang KSP (Dana Transit):</span>
+                            <span class="font-bold text-rose-700">{{ formatRupiah(getSaldo('2110')) }}</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span>Utang Supplier:</span>
+                            <span class="font-bold text-rose-700">{{ formatRupiah(getSaldo('2120')) }}</span>
+                        </div>
+                        <div class="border-t pt-2 flex justify-between text-xs font-semibold text-slate-700">
+                            <span>Total Kewajiban:</span>
+                            <span>{{ formatRupiah(getSaldo('2110') + getSaldo('2120')) }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-xs text-slate-400 border-t pt-4 flex justify-between items-center">
+                    <span>LTM mart System • Auto-Generated Realtime Report</span>
+                    <span>Printed/Viewed at: {{ currentDateTime }}</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: INPUT TRANSAKSI HARIAN -->
+        <section v-if="activeTab === 'input'" class="grid md:grid-cols-2 gap-6">
+            
+            <!-- FORM TRANSAKSI -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
+                <h2 class="text-lg font-bold text-slate-800 border-b pb-2">Form Entry Transaksi</h2>
+                
+                <form @submit.prevent="submitTransaksi" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Jenis Transaksi</label>
+                        <select v-model="form.jenis" @change="resetFormDetail" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-indigo-500">
+                            <option value="penjualan">1. Penjualan Produk (Sarung / Minuman / ATK)</option>
+                            <option value="jasa_payroll">2. Jasa Fee Payroll</option>
+                            <option value="pinjaman_karyawan">3. Pinjaman Karyawan (Per Nama & Tenor)</option>
+                            <option value="pinjaman_pribadi">4. Pinjaman Pribadi (Kolektif)</option>
+                            <option value="tarik_tunai">5. Jasa Tarik Tunai</option>
+                            <option value="transfer_kas">6. Transfer Kas Internal (Laci <-> Brankas)</option>
+                            <option value="transit_ksp">7. Transaksi Transit KSP (via BNI Direct)</option>
+                            <option value="write_off">8. Penghapusan Piutang (Write-Off)</option>
+                            <option value="operasional">9. Biaya Operasional / Beban</option>
+                        </select>
+                    </div>
+
+                    <!-- PENJUALAN PRODUK -->
+                    <template v-if="form.jenis === 'penjualan'">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Kategori Produk</label>
+                                <select v-model="form.kategoriProduk" class="w-full p-2 bg-slate-50 border rounded-lg text-sm">
+                                    <option value="sarung">Sarung</option>
+                                    <option value="minuman">Minuman</option>
+                                    <option value="atk">ATK & Obat</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Metode Bayar</label>
+                                <select v-model="form.rekening" class="w-full p-2 bg-slate-50 border rounded-lg text-sm">
+                                    <option value="1111">Kas Laci Kasir</option>
+                                    <option value="1120">BNI QRIS (SWR)</option>
+                                    <option value="1140">Bank Jatim QRIS (SFD)</option>
+                                    <option value="1210">Potong Gaji (KSP)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Total Penjualan (Rp)</label>
+                                <input type="number" v-model.number="form.nominal" class="w-full p-2 border rounded-lg text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Estimasi HPP (Rp)</label>
+                                <input type="number" v-model.number="form.hpp" class="w-full p-2 border rounded-lg text-sm" required>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- PINJAMAN KARYAWAN -->
+                    <template v-if="form.jenis === 'pinjaman_karyawan'">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Karyawan</label>
+                            <input type="text" v-model="form.namaKaryawan" placeholder="Contoh: Budi Santoso" class="w-full p-2 border rounded-lg text-sm" required>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Nominal Pinjaman (Rp)</label>
+                                <input type="number" v-model.number="form.nominal" class="w-full p-2 border rounded-lg text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Tenor (Bulan)</label>
+                                <input type="number" v-model.number="form.tenor" class="w-full p-2 border rounded-lg text-sm" placeholder="Misal: 5" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Sumber Uang</label>
+                            <select v-model="form.rekening" class="w-full p-2 bg-slate-50 border rounded-lg text-sm">
+                                <option value="1111">Kas Laci Kasir</option>
+                                <option value="1112">Kas Brankas</option>
+                                <option value="1130">BNI BNIdirect</option>
+                            </select>
+                        </div>
+                    </template>
+
+                    <!-- TRANSFER KAS INTERNAL -->
+                    <template v-if="form.jenis === 'transfer_kas'">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Arah Transfer</label>
+                            <select v-model="form.arahKas" class="w-full p-2 bg-slate-50 border rounded-lg text-sm">
+                                <option value="laci_ke_brankas">Setor Laci Kasir -> Brankas (Drop)</option>
+                                <option value="brankas_ke_laci">Ambil Brankas -> Laci Kasir (Modal Kembalian)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nominal (Rp)</label>
+                            <input type="number" v-model.number="form.nominal" class="w-full p-2 border rounded-lg text-sm" required>
+                        </div>
+                    </template>
+
+                    <!-- TARIK TUNAI -->
+                    <template v-if="form.jenis === 'tarik_tunai'">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Uang Tunai Keluar (Rp)</label>
+                                <input type="number" v-model.number="form.nominal" class="w-full p-2 border rounded-lg text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Uang Jasa / Fee (Rp)</label>
+                                <input type="number" v-model.number="form.fee" class="w-full p-2 border rounded-lg text-sm" placeholder="0 jika tanpa fee">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Rekening Masuk (QRIS/Transfer)</label>
+                            <select v-model="form.rekening" class="w-full p-2 bg-slate-50 border rounded-lg text-sm">
+                                <option value="1120">BNI QRIS (SWR)</option>
+                                <option value="1140">Bank Jatim QRIS (SFD)</option>
+                                <option value="1130">BNI BNIdirect</option>
+                            </select>
+                        </div>
+                    </template>
+
+                    <!-- GENERIC NOMINAL & REKENING UNTUK JENIS LAIN -->
+                    <template v-if="['jasa_payroll', 'pinjaman_pribadi', 'transit_ksp', 'write_off', 'operasional'].includes(form.jenis)">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nominal (Rp)</label>
+                            <input type="number" v-model.number="form.nominal" class="w-full p-2 border rounded-lg text-sm" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Rekening / Kas Terkait</label>
+                            <select v-model="form.rekening" class="w-full p-2 bg-slate-50 border rounded-lg text-sm">
+                                <option value="1111">Kas Laci Kasir</option>
+                                <option value="1112">Kas Brankas</option>
+                                <option value="1120">BNI QRIS (SWR)</option>
+                                <option value="1130">BNI BNIdirect</option>
+                                <option value="1140">Bank Jatim QRIS (SFD)</option>
+                            </select>
+                        </div>
+                    </template>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Keterangan Transaksi</label>
+                        <input type="text" v-model="form.keterangan" placeholder="Catatan opsional..." class="w-full p-2 border rounded-lg text-sm">
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-lg text-sm hover:bg-indigo-700 shadow-md transition-colors">
+                        Simpan & Catat Jurnal
+                    </button>
+                </form>
+            </div>
+
+            <!-- RIWAYAT INPUT TERAKHIR -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800 border-b pb-2 mb-4">5 Transaksi Terakhir</h2>
+                    <div class="space-y-3">
+                        <div v-for="j in recentJurnals" :key="j.id" class="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs flex justify-between items-center">
+                            <div>
+                                <p class="font-bold text-slate-800">{{ j.keterangan }}</p>
+                                <p class="text-slate-400 mt-0.5">{{ j.tanggal }}</p>
+                            </div>
+                            <span class="font-mono font-bold text-indigo-600">{{ formatRupiah(j.nominal) }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 mt-6">
+                    <p class="text-xs text-indigo-800 font-semibold">Petunjuk Keuangan LTM mart:</p>
+                    <p class="text-xs text-indigo-600 mt-1">Sistem otomatis menerbitkan baris Debit dan Kredit ke Jurnal Umum setiap kali Anda menekan tombol simpan.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: KARTU PINJAMAN KARYAWAN -->
+        <section v-if="activeTab === 'karyawan'" class="space-y-6">
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <h2 class="text-lg font-bold text-slate-800 border-b pb-4 mb-4">Kartu Piutang & Pinjaman Karyawan</h2>
+                
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div v-for="(k, name) in pinjamanKaryawanGrouped" :key="name" class="border rounded-xl p-4 bg-slate-50 space-y-3">
+                        <div class="flex justify-between items-start border-b pb-2">
+                            <div>
+                                <h3 class="font-bold text-slate-800">{{ name }}</h3>
+                                <p class="text-xs text-slate-400">Tenor: {{ k.tenor }} Bulan • Tgl Pinjam: {{ k.tglPinjam }}</p>
+                            </div>
+                            <span class="px-2 py-1 bg-amber-100 text-amber-800 font-bold rounded text-xs">
+                                Sisa: {{ formatRupiah(k.sisa) }}
+                            </span>
+                        </div>
+
+                        <div class="text-xs space-y-1">
+                            <div class="flex justify-between text-slate-500">
+                                <span>Total Pinjaman Awal:</span>
+                                <span class="font-semibold">{{ formatRupiah(k.totalAwal) }}</span>
+                            </div>
+                            <div class="flex justify-between text-slate-500">
+                                <span>Total Sudah Dibayar:</span>
+                                <span class="font-semibold text-emerald-600">{{ formatRupiah(k.sudahBayar) }}</span>
+                            </div>
+                            <div class="flex justify-between text-slate-500">
+                                <span>Jatuh Tempo:</span>
+                                <span class="font-semibold text-rose-600">{{ k.jatuhTempo }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: LAPORAN KEUANGAN RESMI -->
+        <section v-if="activeTab === 'laporan'" class="space-y-6">
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-6">
+                <div class="flex justify-between items-center border-b pb-4">
+                    <h2 class="text-xl font-bold text-slate-800">Laporan Keuangan Resmi LTM mart</h2>
+                    <button @click="window.print()" class="no-print px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-semibold">Cetak Dokumen</button>
+                </div>
+
+                <!-- NERACA SALDO -->
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">1. Neraca Saldo (Trial Balance)</h3>
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 border-b">
+                                <th class="p-2">Kode</th>
+                                <th class="p-2">Nama Akun</th>
+                                <th class="p-2 text-right">Debit</th>
+                                <th class="p-2 text-right">Kredit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="a in masterAkun" :key="a.kode" class="border-b">
+                                <td class="p-2 font-mono">{{ a.kode }}</td>
+                                <td class="p-2 font-medium">{{ a.nama }}</td>
+                                <td class="p-2 text-right font-mono">{{ formatRupiah(getDebitKredit(a.kode).debit) }}</td>
+                                <td class="p-2 text-right font-mono">{{ formatRupiah(getDebitKredit(a.kode).kredit) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER CETAK UNTUK DOKUMEN -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400 no-print">
+        LTM mart Web Application • Dicetak secara otomatis pada {{ currentDateTime }}
+    </footer>
+
+</div>
+
+<!-- APPLICATION LOGIC (VUE.JS 3) -->
+<script>
+const { createApp } = Vue;
+
+createApp({
+    data() {
+        return {
+            activeTab: 'dashboard',
+            currentRole: 'Pengelola/Pemilik',
+            currentDateTime: '',
+            tabs: [
+                { id: 'dashboard', name: 'Dashboard Exec' },
+                { id: 'input', name: 'Entry Transaksi' },
+                { id: 'karyawan', name: 'Pinjaman Karyawan' },
+                { id: 'laporan', name: 'Laporan Keuangan' }
+            ],
+            masterAkun: [
+                { kode: '1111', nama: 'Kas Tunai Laci Kasir' },
+                { kode: '1112', nama: 'Kas Tunai Brankas' },
+                { kode: '1120', nama: 'Bank BNI QRIS (SWR)' },
+                { kode: '1130', nama: 'Bank BNI BNIdirect' },
+                { kode: '1140', nama: 'Bank Jatim QRIS (SFD)' },
+                { kode: '1210', nama: 'Piutang Potong Gaji (KSP)' },
+                { kode: '1220', nama: 'Pinjaman Karyawan' },
+                { kode: '1230', nama: 'Pinjaman Pribadi (Kolektif)' },
+                { kode: '1310', nama: 'Persediaan Sarung' },
+                { kode: '1320', nama: 'Persediaan Minuman' },
+                { kode: '1330', nama: 'Persediaan ATK & Obat' },
+                { kode: '2110', nama: 'Utang KSP / Koperasi' },
+                { kode: '2120', nama: 'Utang Supplier' },
+                { kode: '3110', nama: 'Modal Pemilik' },
+                { kode: '4110', nama: 'Pendapatan Sarung' },
+                { kode: '4120', nama: 'Pendapatan Minuman' },
+                { kode: '4130', nama: 'Pendapatan ATK & Obat' },
+                { kode: '4210', nama: 'Pendapatan Fee Payroll' },
+                { kode: '4220', nama: 'Pendapatan Jasa Tarik Tunai' },
+                { kode: '5110', nama: 'HPP Sarung' },
+                { kode: '5120', nama: 'HPP Minuman' },
+                { kode: '5130', nama: 'HPP ATK & Obat' },
+                { kode: '6110', nama: 'Beban Gaji & Operasional' },
+                { kode: '6130', nama: 'Beban Kerugian Piutang Write-Off' }
+            ],
+            form: {
+                jenis: 'penjualan',
+                kategoriProduk: 'sarung',
+                rekening: '1111',
+                nominal: 0,
+                hpp: 0,
+                fee: 0,
+                namaKaryawan: '',
+                tenor: 1,
+                arahKas: 'laci_ke_brankas',
+                keterangan: ''
+            },
+            jurnal: []
+        };
+    },
+    mounted() {
+        this.updateClock();
+        setInterval(this.updateClock, 1000);
+        
+        // Load data dari LocalStorage
+        const saved = localStorage.getItem('ltm_jurnal');
+        if (saved) {
+            this.jurnal = JSON.parse(saved);
+        } else {
+            // Seed awal jika kosong
+            this.jurnal = [
+                { id: 1, tanggal: '2026-10-19', akun: '1111', debit: 1500000, kredit: 0, keterangan: 'Saldo Awal Laci' },
+                { id: 2, tanggal: '2026-10-19', akun: '1112', debit: 8000000, kredit: 0, keterangan: 'Saldo Awal Brankas' },
+                { id: 3, tanggal: '2026-10-19', akun: '3110', debit: 0, kredit: 9500000, keterangan: 'Modal Awal' }
+            ];
+            this.saveJurnal();
+        }
+    },
+    computed: {
+        recentJurnals() {
+            return this.jurnal.slice(-5).reverse();
+        },
+        totalPendapatanProduk() {
+            return this.getKreditOnly('4110') + this.getKreditOnly('4120') + this.getKreditOnly('4130');
+        },
+        totalPendapatanJasa() {
+            return this.getKreditOnly('4210') + this.getKreditOnly('4220');
+        },
+        totalHPP() {
+            return this.getDebitOnly('5110') + this.getDebitOnly('5120') + this.getDebitOnly('5130');
+        },
+        totalBeban() {
+            return this.getDebitOnly('6110') + this.getDebitOnly('6130');
+        },
+        labaBersih() {
+            return (this.totalPendapatanProduk + this.totalPendapatanJasa) - (this.totalHPP + this.totalBeban);
+        },
+        pinjamanKaryawanGrouped() {
+            const result = {};
+            this.jurnal.filter(j => j.namaKaryawan).forEach(j => {
+                if (!result[j.namaKaryawan]) {
+                    result[j.namaKaryawan] = {
+                        totalAwal: 0,
+                        sudahBayar: 0,
+                        sisa: 0,
+                        tenor: j.tenor || 1,
+                        tglPinjam: j.tanggal,
+                        jatuhTempo: '2027-03-19'
+                    };
+                }
+                if (j.akun === '1220' && j.debit > 0) result[j.namaKaryawan].totalAwal += j.debit;
+                if (j.akun === '1220' && j.kredit > 0) result[j.namaKaryawan].sudahBayar += j.kredit;
+                result[j.namaKaryawan].sisa = result[j.namaKaryawan].totalAwal - result[j.namaKaryawan].sudahBayar;
+            });
+            return result;
+        }
+    },
+    methods: {
+        updateClock() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            this.currentDateTime = now.toLocaleDateString('id-ID', options) + ' WIB';
+        },
+        formatRupiah(val) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val || 0);
+        },
+        saveJurnal() {
+            localStorage.setItem('ltm_jurnal', JSON.stringify(this.jurnal));
+        },
+        getSaldo(kode) {
+            const d = this.getDebitOnly(kode);
+            const k = this.getKreditOnly(kode);
+            return d - k;
+        },
+        getDebitOnly(kode) {
+            return this.jurnal.filter(j => j.akun === kode).reduce((sum, j) => sum + j.debit, 0);
+        },
+        getKreditOnly(kode) {
+            return this.jurnal.filter(j => j.akun === kode).reduce((sum, j) => sum + j.kredit, 0);
+        },
+        getDebitKredit(kode) {
+            return {
+                debit: this.getDebitOnly(kode),
+                kredit: this.getKreditOnly(kode)
+            };
+        },
+        resetFormDetail() {
+            this.form.nominal = 0;
+            this.form.hpp = 0;
+            this.form.fee = 0;
+        },
+        submitTransaksi() {
+            const tgl = new Date().toISOString().split('T')[0];
+            const id = Date.now();
+
+            if (this.form.jenis === 'penjualan') {
+                const mapAkun = { sarung: '4110', minuman: '4120', atk: '4130' };
+                const mapHpp = { sarung: '5110', minuman: '5120', atk: '5130' };
+                
+                // Kas (D) - Penjualan (K)
+                this.jurnal.push({ id, tanggal: tgl, akun: this.form.rekening, debit: this.form.nominal, kredit: 0, keterangan: `Penjualan ${this.form.kategoriProduk}` });
+                this.jurnal.push({ id, tanggal: tgl, akun: mapAkun[this.form.kategoriProduk], debit: 0, kredit: this.form.nominal, keterangan: `Penjualan ${this.form.kategoriProduk}` });
+                
+                // HPP (D) - Persediaan (K)
+                if (this.form.hpp > 0) {
+                    this.jurnal.push({ id, tanggal: tgl, akun: mapHpp[this.form.kategoriProduk], debit: this.form.hpp, kredit: 0, keterangan: `HPP ${this.form.kategoriProduk}` });
+                }
+            } else if (this.form.jenis === 'pinjaman_karyawan') {
+                this.jurnal.push({ id, tanggal: tgl, akun: '1220', debit: this.form.nominal, kredit: 0, keterangan: `Pinjaman Karyawan: ${this.form.namaKaryawan}`, namaKaryawan: this.form.namaKaryawan, tenor: this.form.tenor });
+                this.jurnal.push({ id, tanggal: tgl, akun: this.form.rekening, debit: 0, kredit: this.form.nominal, keterangan: `Pencairan Pinjaman Karyawan: ${this.form.namaKaryawan}` });
+            } else if (this.form.jenis === 'transfer_kas') {
+                const dari = this.form.arahKas === 'laci_ke_brankas' ? '1111' : '1112';
+                const ke = this.form.arahKas === 'laci_ke_brankas' ? '1112' : '1111';
+                this.jurnal.push({ id, tanggal: tgl, akun: ke, debit: this.form.nominal, kredit: 0, keterangan: `Transfer Kas Internal` });
+                this.jurnal.push({ id, tanggal: tgl, akun: dari, debit: 0, kredit: this.form.nominal, keterangan: `Transfer Kas Internal` });
+            }
+
+            this.saveJurnal();
+            alert('Transaksi Berhasil Dicatat ke Jurnal Umum!');
+            this.resetFormDetail();
+        },
+        printSummary() {
+            window.print();
+        }
+    }
+}).mount('#app');
+</script>
+</body>
+</html>
